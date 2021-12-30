@@ -42,7 +42,7 @@ try:
     api_table = get_dataset_name(api_links)
 
     #create drop-down menu
-    menu_1 = st.sidebar.selectbox('Select and item from the drop-down below', list(api_table.Name))
+    menu_1 = st.sidebar.selectbox('Select an item from the drop-down below', list(api_table.Name))
 
     #store data 
     st.write("#### You selected", menu_1)
@@ -53,7 +53,7 @@ try:
 
     )
     if not col_selector:
-        st.error("Please select at least one country")
+        st.error("Please select at least one element")
     else:
         data = results
         st.dataframe(data[col_selector], 1450,600)
