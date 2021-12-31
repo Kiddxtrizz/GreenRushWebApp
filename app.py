@@ -1,4 +1,4 @@
-from helper_functions import get_endpoints, get_dataset_name, choose_dataset, convert_to_csv
+from helper_functions import get_data, choose_dataset, convert_to_csv
 import streamlit as st
 import time
 import requests
@@ -35,18 +35,15 @@ progress_bar.empty()
 status_text.empty()
 
 try:
-    #collect api endpoints
-    api_links = get_endpoints('https://opendata.mass-cannabis-control.com/browse')
-
-    #extract
-    api_table = get_dataset_name(api_links)
+    #get data
+    api_table = get_data()
 
     #create drop-down menu
     menu_1 = st.sidebar.selectbox('Select an item from the drop-down below', list(api_table.Name))
 
     #store data 
     st.write("#### You selected", menu_1)
-    results = choose_dataset(api_table, menu_1, limit=2000)
+    results = choose_dataset(api_table, menu_1)
 
     col_selector = st.sidebar.multiselect(
             "Filter the view", list(results.columns), list(results.columns)
@@ -67,13 +64,15 @@ try:
         mime = 'text/csv'
     )
 
-except requests.exceptions.HTTPError as errh:
-    st.error("Http Error:",errh)
-except requests.exceptions.ConnectionError as errc:
-    st.error("Error Connecting:",errc)
-except requests.exceptions.Timeout as errt:
-    st.error("Timeout Error:",errt)
-except requests.exceptions.RequestException as err:
-    st.error("OOps: Something Else",err)
+except Exception as e:
+    st.error('What happened', e)
+# except requests.exceptions.HTTPError as errh:
+#     st.error("Http Error:",errh)
+# except requests.exceptions.ConnectionError as errc:
+#     st.error("Error Connecting:",errc)
+# except requests.exceptions.Timeout as errt:
+#     st.error("Timeout Error:",errt)
+# except requests.exceptions.RequestException as err:
+#     st.error("OOps: Something Else",err)
 
     
