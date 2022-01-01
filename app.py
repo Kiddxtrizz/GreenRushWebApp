@@ -65,7 +65,7 @@ try:
     )
 
 except Exception as e:
-    st.error('What happened', e)
+    st.error('What happened')
 # except requests.exceptions.HTTPError as errh:
 #     st.error("Http Error:",errh)
 # except requests.exceptions.ConnectionError as errc:
