@@ -18,18 +18,17 @@ st.set_page_config(
 
 )
 
-menu = ["Home", "Search", "About"]
+menu = ["Home", "Search", "Market Research", "About"]
 
 choice = st.sidebar.selectbox("Webpage Menu", menu)
 
 if choice == "Home":
+    st.empty()
     st.header("Welcome to the Homepage")
     
-    with st.container():
-        st.video("https://www.youtube.com/watch?v=IY2tBWgA81U")
     
 elif choice == "Search":
-    
+    st.empty()
     st.sidebar.title('The Green Rush')
     st.sidebar.subheader('Democratizing Data one repo at a time.')
 
@@ -69,20 +68,19 @@ elif choice == "Search":
     page = st.sidebar.radio('Navigation', page_names)
     
     if page == 'Table View': 
-        with st.expander("Click to open"):
-            st.write("Filter Shelf")
-            col1, col2, col3, col4 = st.columns(4)
+#         with st.expander("Click view filters"):
+#             col1, col2, col3, col4 = st.columns(4)
             
-            with col1: 
-                col_selector = st.selectbox("Select ", list(results.columns))
-                if not col_selector:
-                    st.error("Please select at least one element")
+#             with col1: 
+#                 col_selector = st.selectbox("Select ", list(results.columns))
+#                 if not col_selector:
+#                     st.error("Please select at least one element")
 
-            with col2: 
-                ads = st.text_input("Advanced Search: Hopefully there is a match", value="")
+#             with col2: 
+#                 ads = st.text_input("Advanced Search: Hopefully there is a match", value="")
 
-            with col3:
-                sdts = st.date_input('date')
+#             with col3:
+#                 sdts = st.date_input('date')
             
         st.dataframe(data, 1450,600)
         
@@ -96,13 +94,22 @@ elif choice == "Search":
         )
         
     else:
-        col_selector = st.sidebar.selectbox("Filter the view", list(results.columns))
-        if not col_selector:
-            st.error("Please select at least one element")
-        else:
-            st.bar_chart(data[col_selector].value_counts() , 1450,600)
+        with st.expander("Click view filters"):
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1: 
+                col_selector = st.selectbox("Select ", list(results.columns))
+                if not col_selector:
+                    st.error("Please select at least one element")
+                    
+        st.bar_chart(data[col_selector].value_counts() , 1450,600)
+
+elif choice == 'Market Research':
+    st.empty()
+    st.header("Coming Soon")
 
 else:
+    st.empty()
     st.header("About")
 
 # except Exception as e:
