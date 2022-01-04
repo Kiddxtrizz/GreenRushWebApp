@@ -2,6 +2,7 @@ from helper_functions import get_data, choose_dataset, convert_to_csv
 import streamlit as st
 import time
 import requests
+import re
 
 st.set_page_config(
     page_title = "The Green Rush",
@@ -17,55 +18,95 @@ st.set_page_config(
 
 )
 
+menu = ["Home", "Search", "About"]
 
+choice = st.sidebar.selectbox("Webpage Menu", menu)
 
-
-st.sidebar.title('The Green Rush')
-st.sidebar.subheader('Democratizing Data one repo at a time.')
-
-progress_bar = st.sidebar.progress(0)
-status_text = st.sidebar.empty()
-
-for i in range(0,101):
-    status_text.text("%i%% Complete" % i)
-    progress_bar.progress(i)
-    time.sleep(0.05)
+if choice == "Home":
+    st.header("Welcome to the Homepage")
     
-progress_bar.empty()
-status_text.empty()
+    with st.container():
+        st.video("https://www.youtube.com/watch?v=IY2tBWgA81U")
+    
+elif choice == "Search":
+    
+    st.sidebar.title('The Green Rush')
+    st.sidebar.subheader('Democratizing Data one repo at a time.')
 
-try:
+    progress_bar = st.sidebar.progress(0)
+    status_text = st.sidebar.empty()
+
+    for i in range(0,101):
+        status_text.text("%i%% Complete" % i)
+        progress_bar.progress(i)
+        time.sleep(0.05)
+
+    progress_bar.empty()
+    status_text.empty()
+
     #get data
     api_table = get_data()
-
+    
     #create drop-down menu
-    menu_1 = st.sidebar.selectbox('Select an item from the drop-down below', list(api_table.Name))
+    menu_1 = st.sidebar.selectbox('Select the Dataset you\'re interested in', list(api_table.Name))
 
     #store data 
     st.write("#### You selected", menu_1)
     results = choose_dataset(api_table, menu_1)
 
-    col_selector = st.sidebar.multiselect(
-            "Filter the view", list(results.columns), list(results.columns)
+    # with st.sidebar.expander("Filter View"):
+    #     for i in results.columns:
+    #         st.selectbox(i, results[i])
 
-    )
-    if not col_selector:
-        st.error("Please select at least one element")
-    else:
-        data = results
-        st.dataframe(data[col_selector], 1450,600)
+    data = results
+
+    # with st.expander('Dataset filters'):
+    #     for i in range(len(data.columns)):
+    #         st.selectbox(data.columns[i], data.iloc[:,i], key='selector')
+
+            
+    page_names = ['Table View', 'Visual Creator']
+    page = st.sidebar.radio('Navigation', page_names)
+    
+    if page == 'Table View': 
+        with st.expander("Click to open"):
+            st.write("Filter Shelf")
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1: 
+                col_selector = st.selectbox("Select ", list(results.columns))
+                if not col_selector:
+                    st.error("Please select at least one element")
+
+            with col2: 
+                ads = st.text_input("Advanced Search: Hopefully there is a match", value="")
+
+            with col3:
+                sdts = st.date_input('date')
+            
+        st.dataframe(data, 1450,600)
         
-    csv = convert_to_csv(results)
+        csv = convert_to_csv(results)
 
-    st.download_button(
-        label = "Download File",
-        data = csv,
-        file_name = 'results.csv',
-        mime = 'text/csv'
-    )
+        st.download_button(
+            label = "Download File",
+            data = csv,
+            file_name = 'results.csv',
+            mime = 'text/csv'
+        )
+        
+    else:
+        col_selector = st.sidebar.selectbox("Filter the view", list(results.columns))
+        if not col_selector:
+            st.error("Please select at least one element")
+        else:
+            st.bar_chart(data[col_selector].value_counts() , 1450,600)
 
-except Exception as e:
-    st.error('What happened')
+else:
+    st.header("About")
+
+# except Exception as e:
+#     st.error('What happened')
 # except requests.exceptions.HTTPError as errh:
 #     st.error("Http Error:",errh)
 # except requests.exceptions.ConnectionError as errc:
