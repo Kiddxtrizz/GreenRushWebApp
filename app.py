@@ -18,30 +18,31 @@ st.set_page_config(
 
 )
 
-menu = ["Home", "Search", "Market Research", "About"]
+# progress_bar = st.sidebar.progress(0)
+# status_text = st.sidebar.empty()
 
+# for i in range(0,101):
+#     status_text.text("%i%% Complete" % i)
+#     progress_bar.progress(i)
+#     time.sleep(0.05)
+
+# progress_bar.empty()
+# status_text.empty()
+
+
+menu = ["Home", "Search", "Market Research", "About"]
 choice = st.sidebar.selectbox("Webpage Menu", menu)
 
 if choice == "Home":
     st.empty()
-    st.header("Welcome to the Homepage")
+    st.markdown("# Welcome to My Homepage" +" "+ "👋🏾 👊🏾 🧑🏽‍🚀  👨🏾‍💻 👨🏾‍🎨 ")
+    st.sidebar.header("My Name is what?!!?")
     
     
 elif choice == "Search":
     st.empty()
     st.sidebar.title('The Green Rush')
     st.sidebar.subheader('Democratizing Data one repo at a time.')
-
-    progress_bar = st.sidebar.progress(0)
-    status_text = st.sidebar.empty()
-
-    for i in range(0,101):
-        status_text.text("%i%% Complete" % i)
-        progress_bar.progress(i)
-        time.sleep(0.05)
-
-    progress_bar.empty()
-    status_text.empty()
 
     #get data
     api_table = get_data()
@@ -77,7 +78,7 @@ elif choice == "Search":
                     st.error("Please select at least one element")
 
             with col2: 
-                ads = st.text_input("Advanced Search", value="")
+                ads = st.text_input("Advanced Search: Please select a column header first", value="")
 
         if ads != "":    
             st.dataframe(data[data[col_selector].str.find(ads) != -1], 1450,600)
