@@ -68,21 +68,22 @@ elif choice == "Search":
     page = st.sidebar.radio('Navigation', page_names)
     
     if page == 'Table View': 
-#         with st.expander("Click view filters"):
-#             col1, col2, col3, col4 = st.columns(4)
+        with st.expander("Click to view filters"):
+            col1, col2, col3, col4 = st.columns(4)
             
-#             with col1: 
-#                 col_selector = st.selectbox("Select ", list(results.columns))
-#                 if not col_selector:
-#                     st.error("Please select at least one element")
+            with col1: 
+                col_selector = st.selectbox("Select a column header", list(results.columns))
+                if not col_selector:
+                    st.error("Please select at least one element")
 
-#             with col2: 
-#                 ads = st.text_input("Advanced Search: Hopefully there is a match", value="")
+            with col2: 
+                ads = st.text_input("Advanced Search", value="")
 
-#             with col3:
-#                 sdts = st.date_input('date')
-            
-        st.dataframe(data, 1450,600)
+        if ads != "":    
+            st.dataframe(data[data[col_selector].str.find(ads) != -1], 1450,600)
+        else:
+            st.dataframe(data,1450,600)
+        
         
         csv = convert_to_csv(results)
 
@@ -94,16 +95,19 @@ elif choice == "Search":
         )
         
     else:
-        with st.expander("Click view filters"):
+        with st.expander("Click to view filters"):
             col1, col2, col3, col4 = st.columns(4)
             
             with col1: 
-                col_selector = st.selectbox("Select ", list(results.columns))
+                col_selector = st.selectbox("Select a column to view", list(results.columns), help=list(results.columns))
                 if not col_selector:
                     st.error("Please select at least one element")
-                    
-        st.bar_chart(data[col_selector].value_counts() , 1450,600)
-
+        
+        if len(data[col_selector].unique()) <= 20:
+            st.bar_chart(data[col_selector].value_counts() , 1450,600)
+        else:
+            st.write('Way too many elements to display')
+            
 elif choice == 'Market Research':
     st.empty()
     st.header("Coming Soon")
