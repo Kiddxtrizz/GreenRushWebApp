@@ -99,7 +99,7 @@ elif choice == "Search":
             col1, col2, col3, col4 = st.columns(4)
             
             with col1: 
-                col_selector = st.selectbox("Select a column to view", list(results.columns), help=list(results.columns))
+                col_selector = st.selectbox("Select a column to view", list(results.columns))
                 if not col_selector:
                     st.error("Please select at least one element")
         
