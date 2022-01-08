@@ -1,12 +1,14 @@
 from helper_functions import get_data, choose_dataset, convert_to_csv, load_data
+
 import streamlit as st
-import time
+
+
 import requests
 import re
+
 import pickle
-import plotly.graph_objects as go
+
 import plotly.express as px
-import plotly.io as pio
 
 api_token = 'pk.eyJ1Ijoia2lkZHRyaXp6IiwiYSI6ImNrbGk4dHp2cjRsZXAycG5yZTZ5cGFqNHIifQ.x5o6rqASgACRb4fuTSYkYg'
 
