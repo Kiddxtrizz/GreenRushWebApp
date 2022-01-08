@@ -9,8 +9,6 @@ from sodapy import Socrata
 # import requests module 
 import requests
 import re
-from bs4 import BeautifulSoup
-import time
 
 #web app utility 
 import streamlit as st
@@ -18,11 +16,7 @@ import streamlit as st
 @st.cache
 def get_data():
     files = glob.glob('*.csv')
-    datums = []
-    
-    for file in files:
-        datums.append(pd.read_csv(file)) 
-    data = pd.concat(datums)
+    data = pd.read_csv(files[0])
     
     return data
 
@@ -72,4 +66,9 @@ def convert_to_csv(x):
     # convert dataframe to csv
     return x.to_csv().encode('utf-8')
     
+@st.cache
+def load_data():
+    file = glob.glob('*.csv')
+    df = pd.read_csv(file[1])
     
+    return df
