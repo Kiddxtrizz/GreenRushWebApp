@@ -1,14 +1,12 @@
 from helper_functions import get_data, choose_dataset, convert_to_csv, load_data
-
 import streamlit as st
-
-
+import time
 import requests
 import re
-
 import pickle
-
+import plotly.graph_objects as go
 import plotly.express as px
+import plotly.io as pio
 
 api_token = 'pk.eyJ1Ijoia2lkZHRyaXp6IiwiYSI6ImNrbGk4dHp2cjRsZXAycG5yZTZ5cGFqNHIifQ.x5o6rqASgACRb4fuTSYkYg'
 
@@ -194,9 +192,10 @@ elif choice == 'Market Research':
     #combine it altogether 
     df_segm = df.copy()
     df_segm['segment'] = df_kmeans_pca 
+    df_segm['labels'] = df_segm['segment'].map({0:'Career Focused', 1:'Standard', 2:'Well-Off', 3:'Working Professional'})
     
     #
-    dff = df_segm[['dest_long', 'dest_lat', 'zip_code','population_denisty', 'median_household_income', 'sex','distance','DOB_year','age','Settlement_size', 'segment']]
+    dff = df_segm[['dest_long', 'dest_lat', 'zip_code','population_denisty', 'median_household_income', 'sex','distance','DOB_year','age','Settlement_size', 'segment', 'labels']]
     dff = dff.rename(columns={'dest_long': 'lon','dest_lat': 'lat'})
     df_segm_analysis = dff.groupby(['segment']).mean()
     df_segm_analysis['N obs'] = df_segm[['segment', 'age']].groupby(['segment']).count()
@@ -206,22 +205,44 @@ elif choice == 'Market Research':
     with st.container():
         col1,col2 = st.columns(2)
         
+        chocies = st.sidebar.selectbox("Choose a Segment to Examine", list(dff['labels'].unique()))
+        checkbox = st.sidebar.radio("STP Selection", ('Segment', 'Target', 'Position'))
+        
         # st.map(dff[['lon', 'lat']])
-        with col1:
-            fig = px.scatter_mapbox(dff, lat='lat', lon='lon', color='segment', 
-                                   height = 800,
-                                   width = 600,
-                                   title='Segmented Consumer Map',
-                                   )
+        if checkbox == "Segment":
+            with col1:
+                st.markdown("## Consumer Segment Breakdown")
 
-            fig.update_layout(
-                mapbox_style="mapbox://styles/kiddtrizz/cky3fdrla2fun15nzclck4mdu",
-                mapbox_accesstoken="pk.eyJ1Ijoia2lkZHRyaXp6IiwiYSI6ImNreTNoeHNiZTAyN3czMm8wYmthZXh1Z3oifQ.5_xkXfXF1EXDnORZIn40Xw"
-            )
+                # st.dataframe(df_segm_analysis[['population_denisty', 'median_household_income', 'sex','distance','DOB_year','age','Settlement_size']], height=1450, width=800)
+                
+                fig = px.pie(df_segm_analysis, values='Prop Obs', names=df_segm_analysis.index[:4])
+                st.plotly_chart(fig, sharing="streamlit")
+                
+                # st.dataframe(dff[['zip_code', 'population_denisty', 'median_household_income', 'sex','distance','DOB_year','age','Settlement_size', 'labels']][dff['labels'] == chocies], height=500, width=800)
+                with st.expander("Visual Filter Shelf"):
+                        menuu = st.selectbox("Choose One", ['Age Distribution', 'Zipcode Distribution (Pareto Chart)'])
+                    
+                
 
-            st.plotly_chart(fig, sharing='streamlit')
-        with col2:
-            st.dataframe(df_segm_analysis, height=1450, width=800)
+            with col2:
+
+                fig = px.scatter_mapbox(dff[dff['labels'] == chocies], lat='lat', lon='lon', color='labels', 
+                                       height = 1100,
+                                       width = 800,
+                                        )
+
+                fig.update_layout(
+                    mapbox_style="mapbox://styles/kiddtrizz/cky3fdrla2fun15nzclck4mdu", 
+                    mapbox_accesstoken="pk.eyJ1Ijoia2lkZHRyaXp6IiwiYSI6ImNreTNoeHNiZTAyN3czMm8wYmthZXh1Z3oifQ.5_xkXfXF1EXDnORZIn40Xw"
+                )
+
+                st.plotly_chart(fig, sharing='streamlit')
+        elif checkbox == "Target":
+            st.write("yes")
+
+        else:
+            st.write("yes")
+
 else:
     st.empty()
     st.header("About Me")
