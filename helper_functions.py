@@ -72,3 +72,30 @@ def load_data():
     df = pd.read_csv(file[1])
     
     return df
+
+def get_age_bins(target):
+    age_bin = []
+    for i in range(len(target)):
+        try:
+            if target['age'].iloc[i] > 71:
+                age_bin.append('71 and over')
+            elif target['age'].iloc[i] >= 59 and target['age'].iloc[i] <= 71 :
+                age_bin.append('59 to 71')
+            elif target['age'].iloc[i] >= 46 and target['age'].iloc[i] <= 58 :
+                age_bin.append('46 to 58')
+            elif target['age'].iloc[i] >= 33 and target['age'].iloc[i] <= 45 :
+                age_bin.append('33 to 45')
+            elif target['age'].iloc[i] >= 19 and target['age'].iloc[i] <= 32 :
+                age_bin.append('19 to 32')
+            else:
+                age_bin.append("")
+        except IndexError as e:
+            print(e)  
+    return age_bin
+
+def frequnecy_table(i):
+    freq_tab_district = pd.DataFrame()
+    freq_tab_district = pd.crosstab(index=i, columns='count').sort_values(by='count',ascending=False)
+    freq_tab_district['Relative Frequency'] = (freq_tab_district/freq_tab_district.sum())*100
+    freq_tab_district['Cumulative Frequency'] = freq_tab_district['Relative Frequency'].cumsum()
+    return freq_tab_district
