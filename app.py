@@ -195,7 +195,7 @@ elif choice == 'Market Research':
     #combine it altogether 
     df_segm = df.copy()
     df_segm['segment'] = df_kmeans_pca 
-    df_segm['total price] = df['total price']
+    df_segm['total price'] = df['total price']
     df_segm['labels'] = df_segm['segment'].map({0:'Career Focused', 1:'Standard', 2:'Well-Off', 3:'Working Professional'})
     
     #
