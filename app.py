@@ -77,7 +77,7 @@ elif choice == "Search":
     api_table = get_data()
     
     #create drop-down menu
-    menu_1 = st.sidebar.selectbox('Select the Dataset you\'re interested in', list(api_table.columns))
+    menu_1 = st.sidebar.selectbox('Select the Dataset you\'re interested in', list(api_table.name))
 
     #store data 
     st.write("#### You selected", menu_1)
