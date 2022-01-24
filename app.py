@@ -43,7 +43,7 @@ st.set_page_config(
 # status_text.empty()
 
 
-menu = ["Home", "Search", "Market Research", "About"]
+menu = ["Home", "CCC Reporting", "Market Research", "About Me"]
 choice = st.sidebar.selectbox("Webpage Menu", menu)
 
 if choice == "Home":
@@ -68,7 +68,7 @@ if choice == "Home":
     with st.expander("Click to learn More"):
         st.markdown("The team will be implementing SCRUM methodology to track and evaluate success. The team will produce a minimum viable product to showcase to all stakeholders after each sprint. To ensure the progress is tracked – a burndown chart will be used to mark every successful sprint and maintain the velocity of each sprint.")
     
-elif choice == "Search":
+elif choice == "CCC Reporting":
     st.empty()
     st.sidebar.title('The Green Rush')
     st.sidebar.subheader('Democratizing Data one repo at a time.')
@@ -110,13 +110,17 @@ elif choice == "Search":
                 ads = st.text_input("Advanced Search: Please select a column header first", value="")
 
         if ads != "":
-            
-            c = st.dataframe(data[data[col_selector].str.find(ads) != -1], 1450,600)
+            try:
+                c = st.dataframe(data[data[col_selector].str.find(ads) != -1], 1450,600)
+            except AttributeError as e:
+                st.error("Please choose a word and not a number in the filter shelf")
         else:
             st.dataframe(data,1450,600)
         
-
-        csv = convert_to_csv(results[results[col_selector].str.find(ads) != -1])
+        try:
+            csv = convert_to_csv(results[results[col_selector].str.find(ads) != -1])
+        except AttributeError as ae:
+            csv = convert_to_csv(data)
         
         st.download_button(
             label = "Download File",
@@ -198,7 +202,7 @@ elif choice == 'Market Research':
     df_segm['labels'] = df_segm['segment'].map({0:'Career Focused', 1:'Standard', 2:'Well-Off', 3:'Working Professional'})
     
     #
-    dff = df_segm[['dest_long', 'dest_lat', 'zip_code','population_denisty', 'median_household_income','total_quantity','total price', 'sex','distance','DOB_year','age','Settlement_size', 'segment', 'labels']]
+    dff = df_segm[['dest_long', 'dest_lat', 'zip_code','population_denisty', 'median_household_income','total_quantity','total price', 'sex','distance','DOB_year','age','Settlement_size', 'segment','creation_time', 'labels']]
     dff = dff.rename(columns={'dest_long': 'lon','dest_lat': 'lat'})
     df_segm_analysis = dff.groupby(['segment']).mean()
     df_segm_analysis['N obs'] = df_segm[['segment', 'age']].groupby(['segment']).count()
@@ -209,43 +213,64 @@ elif choice == 'Market Research':
         col1,col2 = st.columns(2)
         
         chocies = st.sidebar.selectbox("Choose a Segment to Examine", list(dff['labels'].unique()))
+        
         checkbox = st.sidebar.radio("STP Selection", ('Segment', 'Target', 'Position'))
+        
+        
         
         # st.map(dff[['lon', 'lat']])
         if checkbox == "Segment":
-            c1,c2,c3 = st.columns(3)
-            pass
-            # c1.metric("Population", df_segm_analysis[df_segm_analysis['N obs'] == chocies])
+            st.markdown("## {} Consumer Segment Breakdown".format(chocies))
             
-            with col1:
-                st.markdown("## Consumer Segment Breakdown")
+#             # c1.metric("Population", df_segm_analysis[df_segm_analysis['N obs'] == chocies])
+            fig = px.scatter_mapbox(dff[dff['labels'] == chocies], lat='lat', lon='lon', color=dff[dff['labels'] == chocies]['total price'], 
+                   height = 600,
+                   width = 800,
+                    size = dff[dff['labels'] == chocies]['total_quantity'],
+                   opacity = 0.5,
+                   color_continuous_scale=px.colors.diverging.Portland , size_max=15)
 
-                st.dataframe(dff[dff['labels'] == chocies], height=600, width=800)
+            fig.update_layout(
+                mapbox_style="mapbox://styles/kiddtrizz/cky3fdrla2fun15nzclck4mdu", 
+                mapbox_accesstoken="pk.eyJ1Ijoia2lkZHRyaXp6IiwiYSI6ImNreTNoeHNiZTAyN3czMm8wYmthZXh1Z3oifQ.5_xkXfXF1EXDnORZIn40Xw"
+            )
+
+            st.plotly_chart(fig, sharing='streamlit')
+
+            with st.expander("Visual Filter Shelf"):
+                menuu = st.selectbox("Choose One", ['Age Distribution', 'Zipcode Distribution (Pareto Chart)'])
+
+            ages = dff[dff['age'] > 0]
+            ages = get_age_bins(dff)
+            dff['age_bin'] = ages
+            dff['sex'] = dff['sex'].map({0:'female', 1:'male'})
+            if menuu == 'Age Distribution':
+                with st.container():
+                    fig = px.histogram(dff, x="age_bin", color="sex", marginal='box')
+                    st.plotly_chart(fig, sharing='streamlit')
+            else:
+                def frequnecy_table(i):
+                    freq_tab_district = pd.DataFrame()
+                    freq_tab_district = pd.crosstab(index=i, columns='count').sort_values(by='count',ascending=False)
+                    freq_tab_district['Relative Frequency'] = (freq_tab_district/freq_tab_district.sum())*100
+                    freq_tab_district['Cumulative Frequency'] = freq_tab_district['Relative Frequency'].cumsum()
+                    return freq_tab_district
+
+
+                zip_freq = frequnecy_table(dff['zip_code'])
+
+                st.dataframe(zip_freq)
+
+#                 temp_df = dff[dff['labels'] == chocies][[ 'zip_code','population_denisty', 'median_household_income', 'sex','distance','Settlement_size']]
+#                 temp_df['sex'] = temp_df['sex'].map({0 : 'female', 1:'male'})
+#                 temp_df['Settlement_size'] = temp_df['Settlement_size'].map({0:"small city", 1:"mid-size city", 2:"big city"})
+                
+#                 st.dataframe(temp_df, height=600, width=800)
                 
 #                 fig = px.pie(df_segm_analysis, values='Prop Obs', names=df_segm_analysis.index[:4])
 #                 st.plotly_chart(fig, sharing="streamlit")
                 
                 # st.dataframe(dff[['zip_code', 'population_denisty', 'median_household_income', 'sex','distance','DOB_year','age','Settlement_size', 'labels']][dff['labels'] == chocies], height=500, width=800)
-                with st.expander("Visual Filter Shelf"):
-                        menuu = st.selectbox("Choose One", ['Age Distribution', 'Zipcode Distribution (Pareto Chart)']) 
-                ages = dff[dff['age'] > 0]
-                ages = get_age_bins(dff)
-                dff['age_bin'] = ages
-                if menuu == 'Age Distribution':
-                    fig = px.histogram(dff, x="age_bin", color="sex", marginal='box')
-                    st.plotly_chart(fig, sharing='streamlit')
-                else:
-                    def frequnecy_table(i):
-                        freq_tab_district = pd.DataFrame()
-                        freq_tab_district = pd.crosstab(index=i, columns='count').sort_values(by='count',ascending=False)
-                        freq_tab_district['Relative Frequency'] = (freq_tab_district/freq_tab_district.sum())*100
-                        freq_tab_district['Cumulative Frequency'] = freq_tab_district['Relative Frequency'].cumsum()
-                        return freq_tab_district
-                    
-                    
-                    zip_freq = frequnecy_table(dff['zip_code'])
-                    
-                    st.dataframe(zip_freq)
                     
                     
                     # fig, ax = plt.subplots()
@@ -259,22 +284,6 @@ elif choice == 'Market Research':
 
 #                     st.pyplot(fig)
 
-
-            with col2:
-
-                fig = px.scatter_mapbox(dff[dff['labels'] == chocies], lat='lat', lon='lon', color=dff[dff['labels'] == chocies]['total price'], 
-                                       height = 1100,
-                                       width = 800,
-                                        size = dff[dff['labels'] == chocies]['total_quantity'],
-                                       opacity = 0.5,
-                                       color_continuous_scale=px.colors.diverging.Portland , size_max=15)
-
-                fig.update_layout(
-                    mapbox_style="mapbox://styles/kiddtrizz/cky3fdrla2fun15nzclck4mdu", 
-                    mapbox_accesstoken="pk.eyJ1Ijoia2lkZHRyaXp6IiwiYSI6ImNreTNoeHNiZTAyN3czMm8wYmthZXh1Z3oifQ.5_xkXfXF1EXDnORZIn40Xw"
-                )
-
-                st.plotly_chart(fig, sharing='streamlit')
                 
         elif checkbox == "Target":
             
@@ -330,28 +339,56 @@ elif choice == 'Market Research':
                 tempss.loc[:, f'Revenue Brand {i}'] = tempss['item_price_1'] * tempss['quant_1']
                 brand_seg_revenue[['segment', f'Revenue Brand {i}']] = tempss[['segment', f'Revenue Brand {i}']].groupby(['segment'], as_index=False).sum()
               
+            c1,c2 = st.columns(2)
+            with c1:
+                tmp_df_purchase_desc = df_purchase_desc.reset_index(drop=True)
+                tmp_df_purchase_desc['labels'] = tmp_df_purchase_desc['segment'].map({0:'Working Professional', 1:'Well-Off', 2:'Standard', 3:'Working Professional'})
+                st.dataframe(tmp_df_purchase_desc[tmp_df_purchase_desc['labels']==chocies][['N_visits', 'total_quantity', 'Avg_Order_quant', 'total price']])
             
-            st.dataframe(df_purchase_desc)
+            with c2:
+                fig = px.pie(seg_pop, values='N_visits', names=seg_pop.index[:4])
+                st.plotly_chart(fig, sharing="streamlit")
             
-            fig = px.pie(seg_pop, values='N_visits', names=seg_pop.index[:4])
-            st.plotly_chart(fig, sharing="streamlit")
             
-            with st.container():
+            cll1, cll2, cll3 = st.columns(3)
+            
+            with cll1:
+                fig, ax = plt.subplots(figsize = (10,10))
+                ax.bar(x = (0,1,2,3)
+                       , tick_label = ('Working Professional','Well-Off', 'Standard', 'Career Focused')
+                       , height = segs_mean['total_quantity']
+                       ,yerr = segs_std['total_quantity']
+                       , color = ('b','red', 'orange', 'g')
+                      )
+                plt.title('Quantity Occassion')
+                st.pyplot(fig)
+
+            with cll2:
+                fig1, ax1 = plt.subplots(figsize = (10,10))
+                ax1.bar(x = (0,1,2,3),
+                       tick_label = ('Working Professional','Well-Off', 'Standard', 'Career Focused')
+                        ,height = segs_mean['N_visits']
+                        ,yerr = segs_std['N_visits']
+                        ,color = ('b','red', 'orange', 'g')
+                       )
+                plt.title('Purchase incidence')
+                st.pyplot(fig1)
+            
+            with cll3:
+                fig2, ax2 = plt.subplots(figsize = (10,10))
+                ax2.bar((0,1,2,3)
+                        ,tick_label = ('Working Professional','Well-Off', 'Standard', 'Career Focused')
+                ,height = segs_mean['Avg_Order_quant']
+                ,yerr = segs_std['Avg_Order_quant']
+                ,color = ('b','red', 'orange', 'g')
+           )
+                plt.title('Order Occassion')
+                st.pyplot(fig2)
                 
-                col1,col2,col3 = st.columns(3)
-
-                with col1:
-                    pass
-                    # fig, ax = plt.subplots
-                    # plt.figure(figsize = (10,10))
-                    # plt.bar(x = (0,1,2),
-                    # tick_label = ('Working Professional', 'Standard', 'Career Focused'),
-                    # height = segs_mean['total_quantity'],
-                    # yerr = segs_std['total_quantity'],
-                    # color = ('b', 'orange', 'g'))
-                    # st.pyplot(fig)
-           
-
+            tmp_ts = dff[dff['labels'] == chocies]['total price'].groupby(dff['creation_time']).median()
+            # tmp_ts['avg price'] = tmp_ts['total price'].mean() 
+            fig1 = px.line(tmp_ts, x= tmp_ts.index, y='total price', title="Avg Spend Per Month")
+            st.plotly_chart(fig1)
 
         else:
             purchase_df = df_segm.copy()
@@ -374,7 +411,6 @@ elif choice == 'Market Research':
             df_price_elas['Mean_PE'] = pe
             
 else:
-    st.empty()
     st.header("About Me")
     st.markdown("My name is Trey W. I'm a Boston (Roxbury) Native who has enjoyed over 20 years in the beautiful city of Boston, and I couldn't be luckier. To top that, I have had the pleasure of attending Northeastern University and obtaining the title of Double Husky after completing both my undergraduate and graduate degrees from the prestigious university. During my graduate studies, I saw a chance to apply my unique perspective, critical thinking skills, and entrepreneurial mindset to various projects and tasks. As a result, I have decided to create a place to showcase my thoughts, ideas, and projects. I hope you enjoy it! Feel free to contact me if you have any questions.")
 # # except Exception as e:
