@@ -394,6 +394,8 @@ elif choice == 'Market Research':
             fig1 = px.line(tmp_ts, x= tmp_ts.index, y='total price', title="Avg Spend Per Month")
             st.plotly_chart(fig1)
 
+            #Total orders 
+
         else:
             purchase_df = df_segm.copy()
             segment_dummies = pd.get_dummies(df_segm['segment'], prefix= 'Segment', prefix_sep='_')
