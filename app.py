@@ -111,14 +111,15 @@ elif choice == "CCC Reporting":
 
         if ads != "":
             try:
-                c = st.dataframe(data[data[col_selector].str.find(ads) != -1], 1450,600)
+                c = st.dataframe(data[data[col_selector].str.find(ads) != -1].reset_index(), 1450,600)
             except AttributeError as e:
                 st.error("Please choose a word and not a number in the filter shelf")
         else:
             st.dataframe(data,1450,600)
         
         try:
-            csv = convert_to_csv(results[results[col_selector].str.find(ads) != -1])
+            data_csv = results[results[col_selector].str.find(ads) != -1].reset_index(drop=True)
+            csv = convert_to_csv(data)
         except AttributeError as ae:
             csv = convert_to_csv(data)
         
@@ -126,10 +127,9 @@ elif choice == "CCC Reporting":
             label = "Download File",
             data = csv,
             file_name = 'results.csv',
-            mime = 'text/csv'
-        )
+            mime = 'text/csv')
         
-    elif == 'Visual Creator':
+    elif page == 'Visual Creator':
         st.sidebar.empty()
         vsc = st.sidebar.radio('Select Chart Type', options=['Bar', 'Line'])
         
@@ -144,6 +144,9 @@ elif choice == "CCC Reporting":
                     y = st.selectbox("Select a column for y-axis", list(results.columns))
 
             with st.container():
+                c= results.groupby([x]).count()
+                value_array = []
+                
                 fig = px.bar(data, x=x, y=list(range(len(data[y]))), title=f"{x} by {y}", 
                                height = 800,
                                width = 1450,)
@@ -165,7 +168,6 @@ elif choice == "CCC Reporting":
                                width = 1450,)
                 st.plotly_chart(fig, sharing='streamlit')
     else:
-        
         pass
         
         
