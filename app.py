@@ -111,7 +111,7 @@ elif choice == "CCC Reporting":
 
         if ads != "":
             try:
-                c = st.dataframe(data[data[col_selector].str.find(ads) != -1].reset_index(), 1450,600)
+                c = st.dataframe(data[data[col_selector].str.find(ads) != -1].reset_index(drop=True), 1450,600)
             except AttributeError as e:
                 st.error("Please choose a word and not a number in the filter shelf")
         else:
