@@ -74,9 +74,14 @@ def convert_to_csv(x):
     return x.to_csv().encode('utf-8')
     
 def load_data():
+<<<<<<< HEAD
      
     file = glob.glob('\data\*.csv')
     df = pd.read_csv(file[0])
+=======
+    
+    df = pd.read_csv('segmentation_data_cleaned.csv')
+>>>>>>> uat
     
     return df
 
