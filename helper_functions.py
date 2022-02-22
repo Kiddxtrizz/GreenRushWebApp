@@ -74,13 +74,8 @@ def convert_to_csv(x):
     return x.to_csv().encode('utf-8')
     
 def load_data():
-    
-    cwd = os.getcwd()
-    loc = '\data'
-    
-    Path = cwd + loc
-    
-    file = glob.glob(Path +'\*.csv')
+     
+    file = glob.glob('\data\*.csv')
     df = pd.read_csv(file[0])
     
     return df
