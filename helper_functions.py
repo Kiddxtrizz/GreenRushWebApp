@@ -75,13 +75,7 @@ def convert_to_csv(x):
     
 def load_data():
     
-    cwd = os.getcwd()
-    loc = '\data'
-    
-    Path = cwd + loc
-    
-    file = glob.glob(Path +'\*.csv')
-    df = pd.read_csv(file[0])
+    df = pd.read_csv('segmentation_data_cleaned.csv')
     
     return df
 
