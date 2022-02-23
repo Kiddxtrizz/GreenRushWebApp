@@ -52,11 +52,34 @@ if choice == "Home":
     
     st.header("Project Overview")
     with st.expander("Click to learn More"):
-        st.image('Picture3.png')
+        st.markdown("""
+        
+    - Phase 1 : **Data Collection**
+        * Leverage API enpoints provided by [CCC Open Data](https://masscannabiscontrol.com/open-data/data-catalog/). 
+        * Capture disparate data sources (e.g., Voting information, real estate listings, vendor lists)
+            - [LoopNet Listings](https://www.loopnet.com/)
+            - [Question 4 Voting Results](https://electionstats.state.ma.us/ballot_questions/view/7297/)
+            - [Vendor Lists](https://mjstack.com/)
+        * Begin data ingestion phase, moving all collected data to [SSMS](https://docs.microsoft.com/en-us/sql/ssms/sql-server-management-studio-ssms?view=sql-server-ver15) hosted on an Azure Server. 
+        * Assess collected data and ensure integrity is intact. 
+        * Begin Exploratory Data Analysis to remove any anomalies, duplicates, etc. 
+        * Create queries for seamless data reporting for both SE/EE participants and BCB. 
+   - Phase 2 : **Development**
+       * Develop simple web application leveraging streamlit framework  
+           
+    - Phase 3 : **Delopyment**
+        * Synthesize available data sources into actionable market insights made available via the web app. 
+        * Leverage tableau server to host market dashboard
+        
+        """)
     
-    st.header("Evaluation")
+    st.header("Next Steps")
     with st.expander("Click to learn More"):
-        st.markdown("The team will be implementing SCRUM methodology to track and evaluate success. The team will produce a minimum viable product to showcase to all stakeholders after each sprint. To ensure the progress is tracked – a burndown chart will be used to mark every successful sprint and maintain the velocity of each sprint.")
+        st.markdown('''
+            - Finalize my simple web application 
+            - Start the second to final iteration of the working **Zoning Dashboard** located [here](https://public.tableau.com/app/profile/trey.w./viz/MA_Cannabis_Market_Draft/Map).
+            - Begin building relationships with state and town officials to highlight the need for a tool such as this web app. 
+''', unsafe_allow_html=True)
 # progress_bar = st.sidebar.progress(0)
 # status_text = st.sidebar.empty()
 
@@ -79,7 +102,7 @@ elif choice == "CCC Reporting":
     menu_1 = st.sidebar.selectbox('Select the Dataset you\'re interested in', list(api_table.Name))
 
     #store data 
-    st.write("#### You selected", menu_1)
+    
     results = choose_dataset(api_table, menu_1)
 
     # with st.sidebar.expander("Filter View"):
@@ -97,6 +120,8 @@ elif choice == "CCC Reporting":
     page = st.sidebar.radio('Navigation', page_names)
 
     if page == 'Table View': 
+        st.write("#### You selected", menu_1)
+        
         with st.expander("Click to view filters"):
             col1, col2, col3, col4 = st.columns(4)
 
@@ -130,7 +155,7 @@ elif choice == "CCC Reporting":
 
     elif page == 'Visual Creator':
         st.sidebar.empty()
-        vsc = st.sidebar.radio('Select Chart Type', options=['Bar', 'Line'])
+        vsc = st.sidebar.radio('Select Chart Type', options=['Bar'])
 
         if vsc == 'Bar':
             with st.expander("Click to view filters"):
@@ -139,33 +164,28 @@ elif choice == "CCC Reporting":
                 with col1: 
                     x = st.selectbox("Select a column for x-axis", list(results.columns))
 
-                with col2:
-                    y = st.selectbox("Select a column for y-axis", list(results.columns))
-
             with st.container():
-                c= results.groupby([x]).count()
-                value_array = []
-
-                fig = px.bar(data, x=x, y=list(range(len(data[y]))), title=f"{x} by {y}", 
-                               height = 800,
-                               width = 1450,)
-                fig.update_yaxes(type='category')
-                st.plotly_chart(fig, sharing='streamlit')
-        else:
-            with st.expander("Click to view filters"):
-                col1, col2, col3 = st.columns(3)
-
-                with col1: 
-                    x = st.selectbox("Select a column for x-axis", list(results.columns))
-
-                with col2:
-                    y = st.selectbox("Select a column for y-axis", list(results.columns))
-
-            with st.container():
-                fig = px.line(data, x=x, y=y, title=f"{x} by {y}", 
+                
+                
+                fig = px.bar(data, x=x, pattern_shape="approved_license_type", title=f"{x}", 
                                height = 800,
                                width = 1450,)
                 st.plotly_chart(fig, sharing='streamlit')
+#         else:
+#             with st.expander("Click to view filters"):
+#                 col1, col2, col3 = st.columns(3)
+
+#                 with col1: 
+#                     x = st.selectbox("Select a column for x-axis", list(results.columns))
+
+#                 with col2:
+#                     y = st.selectbox("Select a column for y-axis", list(results.columns))
+
+#             with st.container():
+#                 fig = px.line(data, x=x, y=y, title=f"{x} by {y}", 
+#                                height = 800,
+#                                width = 1450,)
+#                 st.plotly_chart(fig, sharing='streamlit')
     else:
         pass
             
@@ -218,12 +238,20 @@ elif choice == 'Market Research':
             st.markdown("## {} Consumer Segment Breakdown".format(chocies))
             
 #             # c1.metric("Population", df_segm_analysis[df_segm_analysis['N obs'] == chocies])
-            fig = px.scatter_mapbox(dff[dff['labels'] == chocies], lat='lat', lon='lon', color=dff[dff['labels'] == chocies]['total price'], 
+            choice = dff[dff['labels'] == chocies]
+            total_price = dff[dff['labels'] == chocies]['total price']
+            total_quantity = dff[dff['labels'] == chocies]['total_quantity']
+            
+            fig = px.scatter_mapbox(choice, lat='lat', lon='lon', color= total_price, 
                    height = 600,
                    width = 800,
-                    size = dff[dff['labels'] == chocies]['total_quantity'],
+                   size = total_quantity,
                    opacity = 0.5,
-                   color_continuous_scale=px.colors.diverging.Portland , size_max=15)
+                   color_continuous_scale=px.colors.diverging.Portland
+                                    , size_max=15, labels = {'lat': 'Latitude',
+                                                            'lon' : 'Longitude',
+                                                            'color' : 'Total Price',
+                                                            'size': 'Total Quantity'} )
 
             fig.update_layout(
                 mapbox_style="mapbox://styles/kiddtrizz/cky3fdrla2fun15nzclck4mdu", 
