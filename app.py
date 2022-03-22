@@ -236,6 +236,8 @@ elif choice == 'Market Research':
         # st.map(dff[['lon', 'lat']])
         if checkbox == "Segment":
             st.markdown("## {} Consumer Segment Breakdown".format(chocies))
+            st.write(""" Welcome to the Market Research page! These page(s) give a high-level overview of the current state of the Massachusetts cannabis delivery market. The data was collected via Onfleet for every delivery a third-party company conducted over the course of three months. To replicate the marketing life-cycle I have developed three pages; one of which you are on now **Segment**. The other pages include **Target** and **Position**. """) 
+            st.write(""" The Segment page shows all consumer segements identified by a clustering algorithim. To display the results, I designed a scatterplot heatmap which showcases all customers who have a made a purchase in the specified time period. In addition, there are two graphs **age distribution** & **Zipcode Frequency Chart** which help create a more wholisitic view of the consumer segments. """)
             
 #             # c1.metric("Population", df_segm_analysis[df_segm_analysis['N obs'] == chocies])
             choice = dff[dff['labels'] == chocies]
@@ -251,7 +253,7 @@ elif choice == 'Market Research':
                                     , size_max=15, labels = {'lat': 'Latitude',
                                                             'lon' : 'Longitude',
                                                             'color' : 'Total Price',
-                                                            'size': 'Total Quantity'} )
+                                                            'size': 'Total Quantity'} , title='Consumer Heat Map')
 
             fig.update_layout(
                 mapbox_style="mapbox://styles/kiddtrizz/cky3fdrla2fun15nzclck4mdu", 
@@ -309,7 +311,8 @@ elif choice == 'Market Research':
 
                 
         elif checkbox == "Target":
-            
+            st.markdown("## {} Consumer Segment Target Breakdown".format(chocies))
+            st.write(""" The Target page showcases the value proposition for each consumer segements. The one table displays the top n customer by several variables. Moreover, the pie chart breaksdown the overall size of each segment. The other graphics are self-explantory and give the marketing team some insight into overall purchase & order ocassions (How often they occur) and purchase indicdence. Lastly, a visual highlighting the average spend per month for each segment.""")
 
             #Purchase & Order Occassion
             labeler = LabelEncoder()
@@ -416,7 +419,8 @@ elif choice == 'Market Research':
             #Total orders 
 
         else:
-            pass
+            st.markdown("## {} Consumer Segment Positioning Breakdown".format(chocies))
+            st.write("""Under Construction""")
 #             purchase_df = df_segm.copy()
 #             segment_dummies = pd.get_dummies(df_segm['segment'], prefix= 'Segment', prefix_sep='_')
 #             df_pa = pd.concat([purchase_df, segment_dummies], axis=1)
